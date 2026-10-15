@@ -1,4 +1,4 @@
-import os
+'Dapur' os
 import shutil
 import glob
 import subprocess
@@ -7,6 +7,7 @@ from openpyxl import load_workbook
 def main():
     source_file = 'Form Revisi.xlsx'
     dapur_folder = 'Dapur'
+    addon_folder ='Addon'
     
     print('--> Mengecek keberadaan file sumber...')
     if not os.path.exists(source_file):
@@ -32,7 +33,7 @@ def main():
         input('--> Tekan enter untuk keluar')
         return
 
-    required_files = [
+    required_files_dap = [
         '__init__.py',
         'A1_A_HandleDateOrigin.py',
         'A1_CleaningNSplitting.py',
@@ -44,8 +45,14 @@ def main():
         'helper.conf'
     ]
 
+    required_files_dap = [
+        'Hapus_Baris.py',
+        'Extract_ExcelSheet.py',
+        'KPI_Acc.py'
+    ]
+
     missing_files = []
-    for f in required_files:
+    for f in required_files_dap:
         if not os.path.exists(os.path.join(dapur_folder, f)):
             missing_files.append(f)
 
