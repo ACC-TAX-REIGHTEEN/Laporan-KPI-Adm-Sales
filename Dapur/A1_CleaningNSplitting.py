@@ -5,7 +5,6 @@ from copy import copy
 import re
 
 def copy_style(src_cell, dst_cell):
-    """Fungsi bantu untuk menyalin format (bold, warna, border, dll)"""
     if src_cell.has_style:
         dst_cell.font = copy(src_cell.font)
         dst_cell.border = copy(src_cell.border)
