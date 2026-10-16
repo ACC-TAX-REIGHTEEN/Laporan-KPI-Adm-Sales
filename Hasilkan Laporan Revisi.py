@@ -1,4 +1,4 @@
-'Dapur' os
+import os
 import shutil
 import glob
 import subprocess
@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 def main():
     source_file = 'Form Revisi.xlsx'
     dapur_folder = 'Dapur'
-    addon_folder ='Addon'
+    addon_folder = 'Addon'
     
     print('--> Mengecek keberadaan file sumber...')
     if not os.path.exists(source_file):
@@ -27,9 +27,15 @@ def main():
         input('--> Tekan enter untuk keluar')
         return
 
-    print('--> Mengecek folder dan dependensi Dapur...')
+    print('--> Mengecek folder dan dependensi...')
+    
     if not os.path.exists(dapur_folder):
-        print('--> Gagal: Folder "Dapur" tidak ditemukan.')
+        print(f'--> Gagal: Folder "{dapur_folder}" tidak ditemukan.')
+        input('--> Tekan enter untuk keluar')
+        return
+
+    if not os.path.exists(addon_folder):
+        print(f'--> Gagal: Folder "{addon_folder}" tidak ditemukan.')
         input('--> Tekan enter untuk keluar')
         return
 
@@ -40,24 +46,27 @@ def main():
         'A2_Cosmetics.py',
         'A2_CosmeticsB.py',
         'A3_PivotData.py',
-        'addon_extract_excelSheet.py',
-        'addon_Hapus_Baris.py',
         'helper.conf'
     ]
 
-    required_files_dap = [
-        'Hapus_Baris.py',
+    required_files_addon = [
         'Extract_ExcelSheet.py',
+        'Hapus_Baris.py',
         'KPI_Acc.py'
     ]
 
     missing_files = []
+
     for f in required_files_dap:
         if not os.path.exists(os.path.join(dapur_folder, f)):
-            missing_files.append(f)
+            missing_files.append(f"{dapur_folder}/{f}")
+
+    for f in required_files_addon:
+        if not os.path.exists(os.path.join(addon_folder, f)):
+            missing_files.append(f"{addon_folder}/{f}")
 
     if missing_files:
-        print('--> Gagal: File berikut tidak ditemukan di folder Dapur:')
+        print('--> Gagal: File berikut tidak ditemukan:')
         for mf in missing_files:
             print(f'--> - {mf}')
         input('--> Tekan enter untuk keluar')
