@@ -52,7 +52,8 @@ def main():
     required_files_addon = [
         'Extract_ExcelSheet.py',
         'Hapus_Baris.py',
-        'KPI_Acc.py'
+        'KPI_Acc.py',
+        'KPI_Acc_V2.py'
     ]
 
     missing_files = []
