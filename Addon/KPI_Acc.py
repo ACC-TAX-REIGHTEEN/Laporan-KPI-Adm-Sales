@@ -2,7 +2,6 @@ import os
 import pandas as pd
 
 nama_file_asli = "combine.xlsx"
-
 nama_dasar, ekstensi = os.path.splitext(nama_file_asli)
 nama_file_output = f"{nama_dasar}_pivot{ekstensi}"
 
@@ -14,30 +13,43 @@ df["Tgl Waktu Modifikasi"] = pd.to_datetime(
     df["Tgl Waktu Modifikasi"], dayfirst=True
 )
 
-kamus_bulan = {
-    1: "Januari",
-    2: "Februari",
-    3: "Maret",
-    4: "April",
+kamus_bulan_singkat = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
     5: "Mei",
-    6: "Juni",
-    7: "Juli",
-    8: "Agustus",
-    9: "September",
-    10: "Oktober",
-    11: "November",
-    12: "Desember",
+    6: "Jun",
+    7: "Jul",
+    8: "Agu",
+    9: "Sep",
+    10: "Okt",
+    11: "Nov",
+    12: "Des",
 }
 
-df["Bulan"] = df["Tgl Waktu Modifikasi"].dt.month.map(kamus_bulan)
+df["Periode_Sort"] = df["Tgl Waktu Modifikasi"].dt.to_period("M")
 
-urutan_bulan = list(kamus_bulan.values())
-df["Bulan"] = pd.Categorical(df["Bulan"], categories=urutan_bulan, ordered=True)
+periode_terurut = sorted(df["Periode_Sort"].dropna().unique())
+
+kategori_terurut = [
+    f"{kamus_bulan_singkat[p.month]} {p.year}" for p in periode_terurut
+]
+
+df["Bulan_Tahun"] = (
+    df["Tgl Waktu Modifikasi"].dt.month.map(kamus_bulan_singkat)
+    + " "
+    + df["Tgl Waktu Modifikasi"].dt.year.astype(str)
+)
+
+df["Bulan_Tahun"] = pd.Categorical(
+    df["Bulan_Tahun"], categories=kategori_terurut, ordered=True
+)
 
 tabel_pivot = pd.pivot_table(
     df,
     index=["Nama Pengguna Pengguna", "Tipe transaksi"],
-    columns="Bulan",
+    columns="Bulan_Tahun",
     values="Jumlah Data",
     aggfunc="sum",
     fill_value=0,
