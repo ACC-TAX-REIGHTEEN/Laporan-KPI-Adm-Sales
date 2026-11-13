@@ -1,11 +1,11 @@
+import os
+import re
+import sys
+import configparser
+from datetime import datetime
 import pandas as pd
 import openpyxl
-import configparser
 from fuzzywuzzy import process
-import re
-import os
-import sys
-from datetime import datetime
 
 print("--> Memulai program perbaikan data")
 
@@ -28,19 +28,26 @@ config.read(config_file)
 try:
     valid_depos_str = config['MASTER_DATA']['list_depo']
     valid_names_str = config['MASTER_DATA']['list_nama_sales']
-    
+
     MASTER_DEPO = [x.strip() for x in valid_depos_str.split(',')]
     MASTER_SALES = [x.strip() for x in valid_names_str.split(',')]
-    
+
     print(f"--> Master Data Depo dimuat: {len(MASTER_DEPO)} item")
     print(f"--> Master Data Adm Sales dimuat: {len(MASTER_SALES)} item")
-    
+
 except KeyError as e:
     print(f"--> Gagal: Format helper.conf salah. Key tidak ditemukan: {e}")
     sys.exit()
 
 print("--> Membaca file Excel")
-df = pd.read_excel(input_file, header=0)
+
+try:
+    df = pd.read_excel(input_file, header=0, engine="calamine")
+    print("--> Engine baca: 'calamine' (optimal / high speed)")
+except Exception:
+    df = pd.read_excel(input_file, header=0, engine="openpyxl")
+    print("--> Engine baca: 'openpyxl' (kompatibel / standar)")
+
 df.columns = df.columns.str.strip()
 
 col_divisi = "Divisi"
@@ -50,9 +57,11 @@ col_kesalahan = "Kesalahan Admin/ Bukan"
 col_tgl = "Tgl Revisi"
 
 def clean_text_initial(text):
-    if pd.isna(text): return text
+    if pd.isna(text):
+        return text
     text_str = str(text).strip()
-    if text_str.upper() == "NAN": return pd.NA
+    if text_str.upper() == "NAN":
+        return pd.NA
     return text_str.title()
 
 def is_number(s):
@@ -61,30 +70,29 @@ def is_number(s):
 def smart_date_parser(val):
     if pd.isna(val) or val == "":
         return None
-    
+
     dt_obj = None
     if isinstance(val, datetime):
         dt_obj = val
     else:
         val_str = str(val).strip()
-        
         for fmt in ('%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d', '%m/%d/%Y', '%d/%m/%y'):
             try:
                 dt_obj = datetime.strptime(val_str, fmt)
                 break
             except ValueError:
                 continue
-                
+
     if dt_obj:
         year = dt_obj.year
         month = dt_obj.month
         day = dt_obj.day
-        
+
         if year < 100:
             year += 2000
-        elif year < 1900: 
+        elif year < 1900:
             year = 2000 + (year % 100)
-            
+
         return datetime(year, month, day)
     return None
 
@@ -105,7 +113,7 @@ if col_tgl in df.columns:
         val = df.at[i, col_tgl]
         parsed = smart_date_parser(val)
         dates_list.append(parsed)
-        
+
     for i in range(len(dates_list)):
         if dates_list[i] is None:
             prev_d = None
@@ -118,9 +126,11 @@ if col_tgl in df.columns:
                 if dates_list[j] is not None:
                     next_d = dates_list[j]
                     break
-            if prev_d: dates_list[i] = prev_d
-            elif next_d: dates_list[i] = next_d
-            
+            if prev_d:
+                dates_list[i] = prev_d
+            elif next_d:
+                dates_list[i] = next_d
+
     df[col_tgl] = dates_list
 
 print("--> Menjalankan Fuzzy Matching berdasarkan Master Data")
@@ -128,18 +138,13 @@ print("--> Menjalankan Fuzzy Matching berdasarkan Master Data")
 def apply_fuzzy(text, master_list, threshold=80):
     if pd.isna(text) or str(text).strip() == "":
         return text
-    
+
     text_str = str(text)
-    
     if text_str in master_list:
         return text_str
-        
+
     best_match, score = process.extractOne(text_str, master_list)
-    
-    if score >= threshold:
-        return best_match
-    else:
-        return text 
+    return best_match if score >= threshold else text
 
 if col_depo in df.columns:
     print("--> Mengoreksi kolom Depo...")
@@ -165,8 +170,9 @@ num_rows, num_cols = df.shape
 for r in range(num_rows):
     for c in range(num_cols):
         val = df.iloc[r, c]
-        if pd.isna(val): val = None
-        
+        if pd.isna(val):
+            val = None
+
         cell = ws.cell(row=r + 2, column=c + 1)
         if isinstance(val, datetime):
             cell.value = val
@@ -183,11 +189,14 @@ for col in ws.columns:
     for cell in col:
         try:
             val_len = len(str(cell.value)) if cell.value else 0
-            if val_len > max_len: max_len = val_len
-        except: pass
-    
+            if val_len > max_len:
+                max_len = val_len
+        except Exception:
+            pass
+
     width = max_len + 2
-    if width > 50: width = 50 
+    if width > 50:
+        width = 50
     ws.column_dimensions[col_letter].width = width
 
 wb.save(output_file)
