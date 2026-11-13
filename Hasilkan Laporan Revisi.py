@@ -41,11 +41,11 @@ def main():
 
     required_files_dap = [
         '__init__.py',
-        'A1_A_HandleDateOrigin.py',
-        'A1_CleaningNSplitting.py',
-        'A2_Cosmetics.py',
-        'A2_CosmeticsB.py',
-        'A3_PivotData.py',
+        '1_HandleDateOrigin.py',
+        '2_CleaningNSplitting.py',
+        '3_Cosmetics.py',
+        '4_CosmeticsB.py',
+        '5_PivotData.py',
         'helper.conf'
     ]
 
@@ -95,20 +95,20 @@ def main():
 
     if choice == '1':
         scripts_to_run = [
-            'A1_A_HandleDateOrigin.py',
-            'A1_CleaningNSplitting.py',
-            'A2_Cosmetics.py',
-            'A2_CosmeticsB.py',
-            'A3_PivotData.py'
+            '1_HandleDateOrigin.py',
+            '2_CleaningNSplitting.py',
+            '3_Cosmetics.py',
+            '4_CosmeticsB.py',
+            '5_PivotData.py'
         ]
         output_target = 'Laporan KPI Revisi.xlsx'
         final_name = 'Laporan KPI Revisi.xlsx'
     elif choice == '2':
         scripts_to_run = [
-            'A1_A_HandleDateOrigin.py',
-            'A1_CleaningNSplitting.py',
-            'A2_Cosmetics.py',
-            'A2_CosmeticsB.py'
+            '1_HandleDateOrigin.py',
+            '2_CleaningNSplitting.py',
+            '3_Cosmetics.py',
+            '4_CosmeticsB.py'
         ]
         output_target = 'Form Revisi_cosm_2_temp.xlsx' 
         final_name = 'Laporan Revisi Mentah.xlsx'
